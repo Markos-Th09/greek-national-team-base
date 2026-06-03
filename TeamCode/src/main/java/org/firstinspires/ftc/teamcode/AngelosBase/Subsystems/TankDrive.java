@@ -13,8 +13,8 @@ public class TankDrive {
     private final boolean TELEMETRY_ENABLED = true;
 
     // Motor Configuration
-    private static final String LEFT_MOTOR_NAME = "[LEFT MOTOR NAME]";
-    private static final String RIGHT_MOTOR_NAME = "[RIGHT MOTOR NAME]";
+    public static final String LEFT_MOTOR_NAME = "[LEFT_MOTOR_NAME]";
+    public static final String RIGHT_MOTOR_NAME = "[RIGHT_MOTOR_NAME]";
     private static final DcMotorEx.Direction LEFT_MOTOR_DIRECTION = DcMotorEx.Direction.FORWARD; // Set to REVERSE if left motor is reversed
     private static final DcMotorEx.Direction RIGHT_MOTOR_DIRECTION = DcMotorEx.Direction.FORWARD; // Set to REVERSE if right motor is reversed
     private static final DcMotorEx.ZeroPowerBehavior MOTOR_ZERO_POWER_BEHAVIOR = DcMotorEx.ZeroPowerBehavior.BRAKE; // Set to FLOAT if you want the robot to coast when no power is applied
@@ -22,8 +22,8 @@ public class TankDrive {
     // Feedforward constants
     // KS: is the static gain -> for Static Friction
     // KV: is the velocity gain -> Fixes Motor Inaccuracies Linearly
-    private static final double[] LEFT_FEEDFORWARD = {0.05, 1.0}; // KS, KV for left motor
-    private static final double[] RIGHT_FEEDFORWARD = {0.05, 1.0}; // KS, KV for right motor
+    private static final double[] LEFT_FEEDFORWARD = {0.03, 1.0}; // KS, KV for left motor
+    private static final double[] RIGHT_FEEDFORWARD = {0.03, 1.0}; // KS, KV for right motor
     private static final double KS_THETA = 0.08; // Static gain for turning
 
     // Power Mapping Constants

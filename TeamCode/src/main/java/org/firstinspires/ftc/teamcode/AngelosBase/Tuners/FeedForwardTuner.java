@@ -1,20 +1,20 @@
-package org.firstinspires.ftc.teamcode.AngelosBase.Samples;
+package org.firstinspires.ftc.teamcode.AngelosBase.Tuners;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.AngelosBase.Subsystems.TankDrive;
 
 // This TEST FILE: tunes the feedforward values for the drivebase motors
 // (++ FTCDashboard Config Variables)
 
 //@Disabled // TEST FILE: It is Disabled the OpMode so it doesnt show up in the driver station
 @Config
-@TeleOp(name="FeedForwardTuner", group="Tests")
+@TeleOp(name="FeedForwardTuner", group="Tuners")
 public class FeedForwardTuner extends LinearOpMode {
     private DcMotorEx leftMotor, rightMotor;
     public static double KSL = 0.05, KSR=0.11, KVL = 0.96, KVR = 1.086, power=0;
@@ -22,8 +22,8 @@ public class FeedForwardTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        leftMotor = hardwareMap.get(DcMotorEx.class, "lm");
-        rightMotor = hardwareMap.get(DcMotorEx.class, "rm");
+        leftMotor = hardwareMap.get(DcMotorEx.class, TankDrive.LEFT_MOTOR_NAME);
+        rightMotor = hardwareMap.get(DcMotorEx.class, TankDrive.RIGHT_MOTOR_NAME);
 
         leftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         leftMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);

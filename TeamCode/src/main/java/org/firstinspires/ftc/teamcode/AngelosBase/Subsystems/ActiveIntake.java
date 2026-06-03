@@ -11,7 +11,7 @@ import java.util.function.BooleanSupplier;
 public class ActiveIntake {
     // ----------------------------------- User Configuration ----------------------------------- //
     private static final boolean TELEMETRY_ENABLED = true;
-    private static final String INTAKE_MOTOR_NAME = "intake";
+    private static final String INTAKE_MOTOR_NAME = "[INTAKE_MOTOR_NAME]";
     private static final double FORWARD_VELOCITY = 1.0, REVERSE_VELOCITY = -1.0;
     private static final DcMotorSimple.Direction INTAKE_DIRECTION = DcMotorSimple.Direction.FORWARD; // Set to REVERSE if intake is reversed
     private static final DcMotorEx.ZeroPowerBehavior INTAKE_ZERO_POWER_BEHAVIOR = DcMotorEx.ZeroPowerBehavior.BRAKE; // Set to FLOAT if you want the intake to coast when stopped
@@ -86,12 +86,25 @@ public class ActiveIntake {
         this.state = state;
     }
 
+    public IntakeState getState() {
+        return state;
+    }
+
     public void setPower(double power) {
         intakeMotor.setPower(power);
     }
 
-    public IntakeState getState() {
-        return state;
+    // Actuators
+    public void intake() {
+        setState(IntakeState.FORWARD);
+    }
+
+    public void reverse() {
+        setState(IntakeState.REVERSE);
+    }
+
+    public void stop() {
+        setState(IntakeState.STOPPED);
     }
 
     // ------------------------------------- Utility Methods ------------------------------------ //
