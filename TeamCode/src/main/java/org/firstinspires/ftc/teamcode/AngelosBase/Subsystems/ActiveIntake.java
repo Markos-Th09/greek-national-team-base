@@ -20,7 +20,7 @@ public class ActiveIntake {
 
     // ---------------------------------------- Hardware ---------------------------------------- //
     private DcMotorEx intakeMotor;
-    private BooleanSupplier forwardButton, stopButton, reverseButton;
+    private BooleanSupplier forwardButton, stopButton, reverseButton, toggleIntakeButton;
 
     // ------------------------------------ State Management ------------------------------------ //
     public enum IntakeState {
@@ -46,6 +46,8 @@ public class ActiveIntake {
 
     private Telemetry telemetry;
 
+    private boolean INITIATED_AS_TOGGLE_INTAKE;
+
     // ------------------------------------------------------------------------------------------ //
 
     public ActiveIntake(HardwareMap hm,
@@ -63,14 +65,38 @@ public class ActiveIntake {
         this.reverseButton = reverseButton;
 
         this.telemetry = telemetry;
+
+        INITIATED_AS_TOGGLE_INTAKE = false;
+    }
+
+    public ActiveIntake(HardwareMap hm,
+                        Telemetry telemetry,
+                        BooleanSupplier toggleButton,
+                        BooleanSupplier reverseButton
+    ) {
+        intakeMotor = hm.get(DcMotorEx.class, INTAKE_MOTOR_NAME);
+        intakeMotor.setZeroPowerBehavior(INTAKE_ZERO_POWER_BEHAVIOR);
+        intakeMotor.setDirection(INTAKE_DIRECTION);
+
+        this.toggleIntakeButton = toggleButton;
+        this.reverseButton = reverseButton;
+
+        this.telemetry = telemetry;
+
+        INITIATED_AS_TOGGLE_INTAKE = true;
     }
 
     public void update() {
         if (disabled) return;
 
-        // Set Intake State according to button presses
-        if(forwardButton.getAsBoolean()) setState(IntakeState.FORWARD);
-        if(stopButton.getAsBoolean()) setState(IntakeState.STOPPED);
+        // Set Intake State according to button presses and Intake Type (Toggle, Separate States)
+        if(INITIATED_AS_TOGGLE_INTAKE) {
+            if(toggleIntakeButton.getAsBoolean()) setState(state == IntakeState.FORWARD ? IntakeState.STOPPED : IntakeState.FORWARD);
+        } else {
+            if(forwardButton.getAsBoolean()) setState(IntakeState.FORWARD);
+            if(stopButton.getAsBoolean()) setState(IntakeState.STOPPED);
+        }
+
         if(reverseButton.getAsBoolean()) setState(IntakeState.REVERSE);
 
         // Set motor power based on state
