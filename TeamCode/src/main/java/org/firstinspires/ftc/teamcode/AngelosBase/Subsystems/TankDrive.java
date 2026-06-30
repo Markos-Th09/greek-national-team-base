@@ -37,6 +37,7 @@ public class TankDrive {
             leftPower_map, rightPower_map;
 
     private IMU imu;
+    private Timer uTurnTimer;
 
     public enum Motor {
         LEFT(0),
@@ -80,9 +81,11 @@ public class TankDrive {
 
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
         ));
         imu.initialize(parameters);
+
+        uTurnTimer = new Timer();
 
         this.forwardPower = forwardPower;
         this.turnPower = turnPower;
@@ -103,25 +106,35 @@ public class TankDrive {
         double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         if (doUTurn.getAsBoolean() && !isExecutingUTurn) {
             isExecutingUTurn = true;
-            targetHeading = currentHeading + 180;
+            targetHeading = AngleUnit.normalizeDegrees(currentHeading + 180);
+            uTurnTimer.resetTimer();
         }
 
+        // Timer failsafe
         if (isExecutingUTurn) {
-            double error = AngleUnit.normalizeDegrees(targetHeading - currentHeading);
-            if (Math.abs(error) > DriveBaseConfig.UTURN_THRESHOLD_DEG) {
-                double pGain = 0.025;
-                double minTurnSpeed = 0.25;
-                double turnSpeed = pGain * error;
-                turnSpeed = Range.clip(turnSpeed, -minTurnSpeed, minTurnSpeed);
-
-                leftPower_map = turnSpeed;
-                rightPower_map = -turnSpeed;
-
-                leftMotor.setPower(feedforward(leftPower_map, Motor.LEFT));
-                rightMotor.setPower(feedforward(rightPower_map, Motor.RIGHT));
-                return;
-            } else {
+            if (uTurnTimer.getCurTime() >= 1000) {
                 isExecutingUTurn = false;
+            } else {
+                double error = AngleUnit.normalizeDegrees(targetHeading - currentHeading);
+                if (Math.abs(error) > DriveBaseConfig.UTURN_THRESHOLD_DEG) {
+                    double pGain = 0.025;
+                    double maxTurnSpeed = 0.60;
+                    double minTurnSpeed = 0.25;
+                    double turnSpeed = pGain * error;
+                    turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
+                    if (Math.abs(turnSpeed) < minTurnSpeed) {
+                        turnSpeed = Math.signum(turnSpeed) * minTurnSpeed;
+                    }
+
+                    leftPower_map = turnSpeed;
+                    rightPower_map = -turnSpeed;
+
+                    leftMotor.setPower(feedforward(leftPower_map, Motor.LEFT));
+                    rightMotor.setPower(feedforward(rightPower_map, Motor.RIGHT));
+                    return;
+                } else {
+                    isExecutingUTurn = false;
+                }
             }
         }
 
