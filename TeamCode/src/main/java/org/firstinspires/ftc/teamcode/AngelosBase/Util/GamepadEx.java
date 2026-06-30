@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.AngelosBase.Util;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.util.EnumMap;
@@ -7,7 +9,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 public class GamepadEx {
-    private Gamepad controller;
+    private final Gamepad controller;
 
     public enum Button { // Enum for button mapping
         A, B, X, Y, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT,
@@ -16,8 +18,8 @@ public class GamepadEx {
 
     private final Map<Button, BooleanSupplier> buttonMap = new EnumMap<>(Button.class);
 
-    private boolean cur_states[] = new boolean[Button.values().length];
-    private boolean prev_states[] = new boolean[Button.values().length];
+    private final boolean[] cur_states = new boolean[Button.values().length];
+    private boolean[] prev_states = new boolean[Button.values().length];
 
     public GamepadEx(Gamepad gamepad1) {
         this.controller = gamepad1;
@@ -44,21 +46,21 @@ public class GamepadEx {
     }
 
     // ---------------------------------- Rising Edge Detection --------------------------------- //
-    public boolean justPressed(Button button) {
+    public boolean justPressed(@NonNull Button button) {
         return cur_states[button.ordinal()] && !prev_states[button.ordinal()];
     }
 
     // --------------------------------- Falling Edge Detection --------------------------------- //
-    public boolean justReleased(Button button) {
+    public boolean justReleased(@NonNull Button button) {
         return !cur_states[button.ordinal()] && prev_states[button.ordinal()];
     }
 
     // ------------------------------------- Button States -------------------------------------- //
-    public boolean isDown(Button button) {
+    public boolean isDown(@NonNull Button button) {
         return cur_states[button.ordinal()];
     }
 
-    public boolean isUp(Button button) {
+    public boolean isUp(@NonNull Button button) {
         return !cur_states[button.ordinal()];
     }
 
