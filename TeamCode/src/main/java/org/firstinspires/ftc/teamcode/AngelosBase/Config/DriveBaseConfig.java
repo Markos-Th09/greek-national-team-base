@@ -19,5 +19,7 @@ public class DriveBaseConfig {
     public static double MAX_POWER = 1.0; // Maximum power for driving
 
 
-    public static double TUNING_POWER = 0.0;
+    public static double POWER = 0.0;
+    public static final int TICKS_PER_REVOLUTION = 28;
+    public static final int MAX_RPM = 500;
 }

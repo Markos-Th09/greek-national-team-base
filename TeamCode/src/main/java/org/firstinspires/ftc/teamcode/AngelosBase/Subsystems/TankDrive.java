@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.AngelosBase.Config.DriveBaseConfig;
 import org.firstinspires.ftc.teamcode.AngelosBase.Config.HardwareMapConfig;
 
@@ -151,9 +150,10 @@ public class TankDrive {
     }
 
     public void tuneFeedForward() {
-        leftMotor.setPower(feedforward(DriveBaseConfig.TUNING_POWER, Motor.LEFT));
-        rightMotor.setPower(feedforward(DriveBaseConfig.TUNING_POWER, Motor.RIGHT));
+        leftMotor.setPower(feedforward(DriveBaseConfig.POWER, Motor.LEFT));
+        rightMotor.setPower(feedforward(DriveBaseConfig.POWER, Motor.RIGHT));
 
+        telemetry.addData("Target Vel: ", DriveBaseConfig.POWER * (28 * 500));
         telemetry.addData("Left Actual Vel: ", leftMotor.getVelocity());
         telemetry.addData("Right Actual Vel: ", rightMotor.getVelocity());
         telemetry.update();
