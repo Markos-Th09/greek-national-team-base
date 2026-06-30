@@ -23,8 +23,8 @@ public class Sample_TankDrive extends LinearOpMode {
         drivetrain = new TankDrive(
                 hardwareMap,
                 new MultipleTelemetry(telemetry),
-                controller::getLeftStickY,  // Forward/Backward (Inverted for FTC)
-                controller::getRightStickX,  // Turning
+                controller::getRightStickX,  // Forward/Backward (Inverted for FTC)
+                controller::getLeftStickY,  // Turning
                 controller::getRightTrigger,  // Acceleration/Turbo mapping,
                 () -> controller.justPressed(GamepadEx.Button.Y)
         );
