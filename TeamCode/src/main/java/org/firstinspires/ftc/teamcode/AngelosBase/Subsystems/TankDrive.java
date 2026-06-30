@@ -1,13 +1,19 @@
 package org.firstinspires.ftc.teamcode.AngelosBase.Subsystems;
 
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.AngelosBase.Config.DriveBaseConfig;
 import org.firstinspires.ftc.teamcode.AngelosBase.Config.HardwareMapConfig;
+import org.firstinspires.ftc.teamcode.AngelosBase.Util.GamepadEx;
+import org.firstinspires.ftc.teamcode.AngelosBase.Util.Timer;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class TankDrive {
@@ -17,17 +23,20 @@ public class TankDrive {
     private static final DcMotorEx.Direction RIGHT_MOTOR_DIRECTION = DcMotorEx.Direction.FORWARD; // Set to REVERSE if right motor is reversed
     private static final DcMotorEx.ZeroPowerBehavior MOTOR_ZERO_POWER_BEHAVIOR = DcMotorEx.ZeroPowerBehavior.BRAKE; // Set to FLOAT if you want the robot to coast when no power is applied
 
-
-
     // ---------------------------------------- Hardware ---------------------------------------- //
     private DcMotorEx leftMotor, rightMotor;
     private DoubleSupplier forwardPower, turnPower, accelPower;
+    private BooleanSupplier doUTurn;
+    private boolean isExecutingUTurn = false;
+    private double targetHeading;
     private boolean disabled;
     private MultipleTelemetry telemetry;
 
     // ------------------------------------------------------------------------------------------ //
     private double max_mapping_power, left_power, right_power, max_raw_power,
             leftPower_map, rightPower_map;
+
+    private IMU imu;
 
     public enum Motor {
         LEFT(0),
@@ -56,10 +65,12 @@ public class TankDrive {
             MultipleTelemetry telemetry,
             DoubleSupplier forwardPower,
             DoubleSupplier turnPower,
-            DoubleSupplier accelPower
+            DoubleSupplier accelPower,
+            BooleanSupplier doUTurn
     ) {
         leftMotor = hm.get(DcMotorEx.class, HardwareMapConfig.LEFT_MOTOR_NAME);
         rightMotor = hm.get(DcMotorEx.class, HardwareMapConfig.RIGHT_MOTOR_NAME);
+        imu = hm.get(IMU.class, HardwareMapConfig.IMU);
 
         leftMotor.setZeroPowerBehavior(MOTOR_ZERO_POWER_BEHAVIOR);
         rightMotor.setZeroPowerBehavior(MOTOR_ZERO_POWER_BEHAVIOR);
@@ -67,9 +78,16 @@ public class TankDrive {
         leftMotor.setDirection(LEFT_MOTOR_DIRECTION);
         rightMotor.setDirection(RIGHT_MOTOR_DIRECTION);
 
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+        ));
+        imu.initialize(parameters);
+
         this.forwardPower = forwardPower;
         this.turnPower = turnPower;
         this.accelPower = accelPower;
+        this.doUTurn = doUTurn;
 
         this.telemetry = telemetry;
     }
@@ -81,6 +99,31 @@ public class TankDrive {
 
     public void update() {
         if (disabled) return;
+
+        double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        if (doUTurn.getAsBoolean() && !isExecutingUTurn) {
+            isExecutingUTurn = true;
+            targetHeading = currentHeading + 180;
+        }
+
+        if (isExecutingUTurn) {
+            double error = AngleUnit.normalizeDegrees(targetHeading - currentHeading);
+            if (Math.abs(error) > DriveBaseConfig.UTURN_THRESHOLD_DEG) {
+                double pGain = 0.025;
+                double minTurnSpeed = 0.25;
+                double turnSpeed = pGain * error;
+                turnSpeed = Range.clip(turnSpeed, -minTurnSpeed, minTurnSpeed);
+
+                leftPower_map = turnSpeed;
+                rightPower_map = -turnSpeed;
+
+                leftMotor.setPower(feedforward(leftPower_map, Motor.LEFT));
+                rightMotor.setPower(feedforward(rightPower_map, Motor.RIGHT));
+                return;
+            } else {
+                isExecutingUTurn = false;
+            }
+        }
 
         // ------------------------------------ Calculations ------------------------------------ //
         max_mapping_power = Range.scale(

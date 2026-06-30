@@ -22,4 +22,6 @@ public class DriveBaseConfig {
     public static double POWER = 0.0;
     public static final int TICKS_PER_REVOLUTION = 28;
     public static final int MAX_RPM = 500;
+
+    public static double UTURN_THRESHOLD_DEG = 1.0;
 }
