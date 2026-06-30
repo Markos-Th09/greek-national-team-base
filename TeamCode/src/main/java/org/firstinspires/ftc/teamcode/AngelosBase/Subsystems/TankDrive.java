@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.AngelosBase.Subsystems;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -23,7 +24,7 @@ public class TankDrive {
     private DcMotorEx leftMotor, rightMotor;
     private DoubleSupplier forwardPower, turnPower, accelPower;
     private boolean disabled;
-    private Telemetry telemetry;
+    private MultipleTelemetry telemetry;
 
     // ------------------------------------------------------------------------------------------ //
     private double max_mapping_power, left_power, right_power, max_raw_power,
@@ -33,8 +34,8 @@ public class TankDrive {
         LEFT(0),
         RIGHT(1);
 
-        public static final double[] KS = {DriveBaseConfig.LEFT_FEEDFORWARD[0], DriveBaseConfig.RIGHT_FEEDFORWARD[0]};
-        public static final double[] KV = {DriveBaseConfig.LEFT_FEEDFORWARD[1], DriveBaseConfig.RIGHT_FEEDFORWARD[1]};
+        public static double[] KS = {DriveBaseConfig.LEFT_KS, DriveBaseConfig.RIGHT_KS};
+        public static double[] KV = {DriveBaseConfig.LEFT_KV, DriveBaseConfig.RIGHT_KV};
 
         private final int idx;
 
@@ -48,13 +49,20 @@ public class TankDrive {
         public double getKV() {
             return KV[idx];
         }
+
+        public static void updateTuneValues() {
+            KS[0] = DriveBaseConfig.LEFT_KS;
+            KS[1] = DriveBaseConfig.RIGHT_KS;
+            KV[0] = DriveBaseConfig.LEFT_KV;
+            KV[1] = DriveBaseConfig.RIGHT_KV;
+        }
     }
 
     // ------------------------------------------------------------------------------------------ //
 
     public TankDrive(
             HardwareMap hm,
-            Telemetry telemetry,
+            MultipleTelemetry telemetry,
             DoubleSupplier forwardPower,
             DoubleSupplier turnPower,
             DoubleSupplier accelPower
@@ -148,5 +156,16 @@ public class TankDrive {
 
     public void disable() {
         setDisabled(true);
+    }
+
+    public void tuneFeedForward() {
+        Motor.updateTuneValues();
+
+        leftMotor.setPower(feedforward(DriveBaseConfig.TUNING_POWER, Motor.LEFT));
+        rightMotor.setPower(feedforward(DriveBaseConfig.TUNING_POWER, Motor.RIGHT));
+
+        telemetry.addData("Left Actual Vel: ", leftMotor.getVelocity());
+        telemetry.addData("Right Actual Vel: ", rightMotor.getVelocity());
+        telemetry.update();
     }
 }

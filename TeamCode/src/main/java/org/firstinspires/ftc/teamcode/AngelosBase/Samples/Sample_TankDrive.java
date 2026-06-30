@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.AngelosBase.Samples;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -22,7 +23,7 @@ public class Sample_TankDrive extends LinearOpMode {
         // We map the sticks and triggers directly here.
         drivetrain = new TankDrive(
                 hardwareMap,
-                telemetry,
+                new MultipleTelemetry(telemetry),
                 controller::getLeftStickY,  // Forward/Backward (Inverted for FTC)
                 controller::getRightStickX,  // Turning
                 controller::getRightTrigger  // Acceleration/Turbo mapping
