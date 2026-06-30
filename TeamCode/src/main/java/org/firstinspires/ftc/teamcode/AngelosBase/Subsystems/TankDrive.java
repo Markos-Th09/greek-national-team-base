@@ -34,9 +34,6 @@ public class TankDrive {
         LEFT(0),
         RIGHT(1);
 
-        public static double[] KS = {DriveBaseConfig.LEFT_KS, DriveBaseConfig.RIGHT_KS};
-        public static double[] KV = {DriveBaseConfig.LEFT_KV, DriveBaseConfig.RIGHT_KV};
-
         private final int idx;
 
         Motor(int idx) {
@@ -44,17 +41,12 @@ public class TankDrive {
         }
 
         public double getKS() {
+            double[] KS = {DriveBaseConfig.LEFT_KS, DriveBaseConfig.RIGHT_KS};
             return KS[idx];
         }
         public double getKV() {
+            double[] KV = {DriveBaseConfig.LEFT_KV, DriveBaseConfig.RIGHT_KV};
             return KV[idx];
-        }
-
-        public static void updateTuneValues() {
-            KS[0] = DriveBaseConfig.LEFT_KS;
-            KS[1] = DriveBaseConfig.RIGHT_KS;
-            KV[0] = DriveBaseConfig.LEFT_KV;
-            KV[1] = DriveBaseConfig.RIGHT_KV;
         }
     }
 
@@ -159,8 +151,6 @@ public class TankDrive {
     }
 
     public void tuneFeedForward() {
-        Motor.updateTuneValues();
-
         leftMotor.setPower(feedforward(DriveBaseConfig.TUNING_POWER, Motor.LEFT));
         rightMotor.setPower(feedforward(DriveBaseConfig.TUNING_POWER, Motor.RIGHT));
 

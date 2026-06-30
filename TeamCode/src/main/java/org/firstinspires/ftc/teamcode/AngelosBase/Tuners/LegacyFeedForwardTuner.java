@@ -17,10 +17,11 @@ import org.firstinspires.ftc.teamcode.AngelosBase.Config.HardwareMapConfig;
 @Deprecated
 @Disabled
 @Config
-@TeleOp(name="FeedForwardTuner", group="Tuners")
+@TeleOp(name = "FeedForwardTuner", group = "Tuners")
 public class LegacyFeedForwardTuner extends LinearOpMode {
     private DcMotorEx leftMotor, rightMotor;
     public static double KSL = 0.05, KSR = 0.11, KVL = 0.96, KVR = 1.086, power = 0;
+    private static final double EPSILON = 1e-23;
     private Telemetry dash_tele;
 
     @Override
@@ -36,10 +37,10 @@ public class LegacyFeedForwardTuner extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            leftMotor.setPower(KSL * Math.signum(power+0.00000000000000000000001) + KVL * power);
-            rightMotor.setPower(KSR * Math.signum(power+0.00000000000000000000001) + KVR * power);
+            leftMotor.setPower(KSL * Math.signum(power + EPSILON) + KVL * power);
+            rightMotor.setPower(KSR * Math.signum(power + EPSILON) + KVR * power);
 
-            dash_tele.addData("Target Vel: ", power*(28*500));
+            dash_tele.addData("Target Vel: ", power * (28 * 500));
             dash_tele.addData("Left Actual Vel: ", leftMotor.getVelocity());
             dash_tele.addData("Right Actual Vel: ", rightMotor.getVelocity());
             dash_tele.update();
